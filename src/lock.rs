@@ -2,7 +2,7 @@ use std::ops::{Deref, DerefMut};
 
 /// An asynchronous mutex similar to [`std::sync::Mutex`].
 pub trait Mutex<T: ?Sized> {
-    type Guard<'a>: MutexGuard<'a, T>
+    type Guard<'a>
     where
         Self: 'a;
 
@@ -13,17 +13,6 @@ pub trait Mutex<T: ?Sized> {
 
     /// Locks this mutex, causing the current task to yield until the lock has been acquired.
     fn lock(&self) -> impl Future<Output = Self::Guard<'_>>;
-
-    /// Locks this mutex, **blocking the current thread** until it can be acquired.
-    ///
-    /// This method should not be used in an asynchronous context. It is intended to facilitate
-    /// the use of the same mutex in synchronous and asynchronous code.
-    ///
-    /// # Panics
-    ///
-    /// [Tokio's implementation](tokio::sync::Mutex::blocking_lock) will panic if used in an
-    /// asynchronous context.
-    fn blocking_lock(&self) -> Self::Guard<'_>;
 
     /// Attempts to lock the mutex, returning [`None`] if it is already locked.
     fn try_lock(&self) -> Option<Self::Guard<'_>>;
@@ -40,9 +29,28 @@ pub trait Mutex<T: ?Sized> {
 }
 
 /// A guard that unlocks its associated [`Mutex`] when dropped.
-pub trait MutexGuard<'a, T: ?Sized>: Deref<Target = T> {
+pub trait MutexGuard<'a, T: ?Sized>: Deref<Target = T> + DerefMut {
     /// Returns a reference to the `Mutex` from which this guard was acquired.
     fn source(this: &Self) -> &'a (impl Mutex<T, Guard<'a> = Self> + ?Sized + 'a);
+}
+
+/// More extensive behavior for `Mutex` implemented by tokio and smol (that is, only _not_
+/// implemented by futures).
+pub trait MutexExt<'a, T: ?Sized>: Mutex<T>
+where
+    <Self as Mutex<T>>::Guard<'a>: MutexGuard<'a, T>,
+    Self: 'a,
+{
+    /// Locks this mutex, **blocking the current thread** until it can be acquired.
+    ///
+    /// This method should not be used in an asynchronous context. It is intended to facilitate
+    /// the use of the same `Mutex` in synchronous and asynchronous code.
+    ///
+    /// # Panics
+    ///
+    /// [Tokio's implementation](tokio::sync::Mutex::blocking_lock) will panic if used in an
+    /// asynchronous context.
+    fn blocking_lock(&self) -> Self::Guard<'_>;
 }
 
 /// An asynchronous reader-writer lock similar to [`std::sync::RwLock`].

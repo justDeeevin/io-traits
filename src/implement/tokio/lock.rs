@@ -34,10 +34,6 @@ impl<T: ?Sized> Mutex<T> for tokio::sync::Mutex<T> {
         self.lock()
     }
 
-    fn blocking_lock(&self) -> Self::Guard<'_> {
-        self.blocking_lock()
-    }
-
     fn try_lock(&self) -> Option<Self::Guard<'_>> {
         self.try_lock().ok()
     }
@@ -51,6 +47,12 @@ impl<T: ?Sized> Mutex<T> for tokio::sync::Mutex<T> {
         T: Sized,
     {
         self.into_inner()
+    }
+}
+
+impl<'a, T: ?Sized + 'a> MutexExt<'a, T> for tokio::sync::Mutex<T> {
+    fn blocking_lock(&self) -> Self::Guard<'_> {
+        self.blocking_lock()
     }
 }
 

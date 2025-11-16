@@ -35,10 +35,6 @@ impl<T: ?Sized> Mutex<T> for async_lock::Mutex<T> {
         self.lock()
     }
 
-    fn blocking_lock(&self) -> Self::Guard<'_> {
-        self.lock_blocking()
-    }
-
     fn try_lock(&self) -> Option<Self::Guard<'_>> {
         self.try_lock()
     }
@@ -52,6 +48,12 @@ impl<T: ?Sized> Mutex<T> for async_lock::Mutex<T> {
         T: Sized,
     {
         self.into_inner()
+    }
+}
+
+impl<'a, T: ?Sized + 'a> MutexExt<'a, T> for async_lock::Mutex<T> {
+    fn blocking_lock(&self) -> Self::Guard<'_> {
+        self.lock_blocking()
     }
 }
 

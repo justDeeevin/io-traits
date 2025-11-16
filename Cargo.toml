@@ -4,15 +4,14 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-tokio = { version = "1.48.0", default-features = false, features = [
-  "sync",
-], optional = true }
+tokio = { version = "1.48.0", optional = true }
 async-lock = { version = "3.4.1", optional = true }
-futures = { version = "0.3.31", optional = true }
+futures = { version = "0.3.31", default-features = false, optional = true }
 
 [features]
-default = ["tokio", "smol", "full"]
+default = ["full"]
 smol = ["dep:futures", "dep:async-lock"]
 tokio = ["dep:futures", "dep:tokio"]
+futures-executor = ["dep:futures"]
 full = ["lock"]
-lock = []
+lock = ["tokio/sync", "futures/std"]
