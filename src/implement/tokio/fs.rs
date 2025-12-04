@@ -1,8 +1,8 @@
 use crate::fs::*;
-use futures::Stream;
+use futures_lite::Stream;
 use tokio_util::compat::{Compat, TokioAsyncReadCompatExt};
 
-impl Fs for crate::runtime::Tokio {
+impl Fs for crate::Tokio {
     type File = Compat<tokio::fs::File>;
 
     fn canonocalize(

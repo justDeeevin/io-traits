@@ -11,6 +11,7 @@ thiserror = "2.0.17"
 tokio-stream = { version = "0.1.17", default-features = false, optional = true }
 tokio-util = { version = "0.7.17", default-features = false, optional = true }
 macro_rules_attribute = "0.2.2"
+futures-lite = { version = "2.6.1", default-features = false, optional = true }
 
 [features]
 default = ["full"]
@@ -21,12 +22,6 @@ futures = ["dep:futures"]
 
 full = ["lock", "channel", "exec", "fs"]
 exec = ["tokio/rt-multi-thread", "futures/thread-pool"]
-lock = ["tokio/sync", "futures/std"]
-channel = ["dep:futures", "tokio/sync", "tokio-stream/sync"]
-fs = [
-  "dep:futures",
-  "futures/std",
-  "tokio/fs",
-  "tokio-stream/fs",
-  "tokio-util/compat",
-]
+lock = ["tokio/sync"]
+channel = ["dep:futures-lite", "tokio/sync", "tokio-stream/sync"]
+fs = ["dep:futures-lite", "tokio/fs", "tokio-stream/fs", "tokio-util/compat"]

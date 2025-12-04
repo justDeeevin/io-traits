@@ -39,12 +39,3 @@ pub trait RuntimeChannelsExt: RuntimeChannels {
 pub trait RuntimeExecutor {
     type Executor: Executor;
 }
-
-#[cfg(feature = "tokio")]
-pub struct Tokio;
-
-#[cfg(feature = "smol")]
-pub struct Smol;
-
-#[cfg(feature = "futures")]
-pub struct Futures;

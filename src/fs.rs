@@ -6,7 +6,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use futures::{AsyncRead, AsyncSeek, AsyncWrite, Stream};
+use futures_lite::{AsyncRead, AsyncSeek, AsyncWrite, Stream};
 
 pub trait Fs {
     type File: File;

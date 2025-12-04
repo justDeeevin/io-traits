@@ -1,4 +1,4 @@
-use crate::runtime::*;
+use crate::{Smol, runtime::*};
 
 #[cfg(feature = "lock")]
 impl RuntimeLock for Smol {

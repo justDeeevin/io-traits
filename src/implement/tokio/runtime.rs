@@ -1,4 +1,4 @@
-use crate::runtime::*;
+use crate::{Tokio, runtime::*};
 
 #[cfg(feature = "lock")]
 impl RuntimeLock for Tokio {

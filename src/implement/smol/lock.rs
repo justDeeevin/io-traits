@@ -1,5 +1,3 @@
-use futures::FutureExt;
-
 use crate::lock::*;
 
 impl Barrier for smol::lock::Barrier {
@@ -139,8 +137,8 @@ impl Semaphore for smol::lock::Semaphore {
         self.add_permits(n)
     }
 
-    fn acquire(&self) -> impl Future<Output = Option<Self::Permit<'_>>> {
-        self.acquire().map(Some)
+    async fn acquire(&self) -> Option<Self::Permit<'_>> {
+        Some(self.acquire().await)
     }
 
     fn try_acquire(&self) -> Option<Self::Permit<'_>> {

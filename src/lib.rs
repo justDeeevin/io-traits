@@ -12,11 +12,20 @@ pub mod fs;
 
 macro_rules! any_feature {
   ($($item:tt)*) => {
-    #[cfg(any(feature = "lock", feature = "channel", feature = "exec", feature = "fs"))]
+    #[cfg(any(feature = "lock", feature = "channel", feature = "exec"))]
     $($item)*
   }
 }
 
 any_feature! { pub mod runtime; }
+
+#[cfg(feature = "tokio")]
+pub struct Tokio;
+
+#[cfg(feature = "smol")]
+pub struct Smol;
+
+#[cfg(feature = "futures")]
+pub struct Futures;
 
 mod implement;

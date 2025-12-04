@@ -1,5 +1,4 @@
 use crate::lock::*;
-use futures::future::FutureExt;
 
 impl Barrier for tokio::sync::Barrier {
     fn new(n: usize) -> Self {
@@ -138,8 +137,8 @@ impl Semaphore for tokio::sync::Semaphore {
         self.add_permits(n)
     }
 
-    fn acquire(&self) -> impl Future<Output = Option<Self::Permit<'_>>> {
-        self.acquire().map(Result::ok)
+    async fn acquire(&self) -> Option<Self::Permit<'_>> {
+        self.acquire().await.ok()
     }
 
     fn try_acquire(&self) -> Option<Self::Permit<'_>> {

@@ -1,4 +1,4 @@
-use crate::runtime::*;
+use crate::{Futures, runtime::*};
 
 #[cfg(feature = "lock")]
 impl RuntimeLock for Futures {
