@@ -10,6 +10,9 @@ pub mod executor;
 #[cfg(feature = "fs")]
 pub mod fs;
 
+#[cfg(feature = "time")]
+pub mod time;
+
 #[cfg(any(feature = "tokio", feature = "smol", feature = "futures"))]
 pub mod runtime;
 

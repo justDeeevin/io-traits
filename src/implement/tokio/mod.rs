@@ -9,3 +9,6 @@ mod channel;
 
 #[cfg(feature = "fs")]
 mod fs;
+
+#[cfg(feature = "time")]
+mod time;
