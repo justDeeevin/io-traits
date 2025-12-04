@@ -12,3 +12,6 @@ mod fs;
 
 #[cfg(feature = "time")]
 mod time;
+
+#[cfg(feature = "net")]
+mod net;
