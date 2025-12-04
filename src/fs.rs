@@ -144,10 +144,19 @@ pub trait DirEntry {
 /// [`BufReader`](futures_lite::io::BufReader) or [`BufWriter`](futures_lite::io::BufWriter) when performing many
 /// small read or write calls, unless unbuffered reads and writes are required.
 pub trait File: AsRawFd + AsyncRead + AsyncWrite + AsyncSeek {
+    type OpenOptions: OpenOptions + 'static;
+
     /// Opens a file in write-only mode.
     ///
     /// Creates a file if it does not exist, and truncates it if it does.
     fn create(path: impl AsRef<Path>) -> impl Future<Output = Result<Self>>
+    where
+        Self: Sized;
+
+    /// Opens a file in read-write mode.
+    ///
+    /// Creates a file if it does not exist, or returns an error if it does.
+    fn create_new(path: impl AsRef<Path>) -> impl Future<Output = Result<impl File>>
     where
         Self: Sized;
 
@@ -181,4 +190,49 @@ pub trait File: AsRawFd + AsyncRead + AsyncWrite + AsyncSeek {
     /// This function is similar to [`sync_all`](File::sync_all), except that it might not
     /// synchronize file metadata to the filesystem.
     fn sync_data(&self) -> impl Future<Output = Result<()>>;
+}
+
+/// Options and flags which configure how a file is opened.
+pub trait OpenOptions: Default {
+    /// Creates a new set of options with all options set to `false`.
+    fn new() -> Self;
+
+    /// Sets the option for read access.
+    fn read(&mut self, read: bool) -> &mut Self;
+
+    /// Sets the option for write access.
+    fn write(&mut self, write: bool) -> &mut Self;
+
+    /// Sets the option for append mode.
+    ///
+    /// This option, when true, means that writes will append to a file instead of overwriting
+    /// previous contents. Note that setting `.write(true).append(true)` has the same effect as
+    /// setting only `.append(true)`.
+    fn append(&mut self, append: bool) -> &mut Self;
+
+    /// Sets the option for truncating a previous file on open.
+    ///
+    /// The file must be opened with write access for truncate to work.
+    fn truncate(&mut self, truncate: bool) -> &mut Self;
+
+    /// Sets the option for creating a new file if it doesn't already exist.
+    ///
+    /// In order for the file to be created, write or append access must be used.
+    fn create(&mut self, create: bool) -> &mut Self;
+
+    /// Sets the option to always create a new file.
+    ///
+    /// No file is allowed to exist at the target location.
+    ///
+    /// If this is set, [`.create()`](OpenOptions::create) and [`.truncate()`](OpenOptions::truncate)
+    /// are ignored.
+    ///
+    /// The file must be opened with write or append access for this to work.
+    fn create_new(&mut self, create_new: bool) -> &mut Self;
+
+    /// Opens a file at `path` with the options specified by `self`.
+    fn open(
+        &self,
+        path: impl AsRef<Path>,
+    ) -> impl Future<Output = Result<impl File<OpenOptions = Self>>>;
 }

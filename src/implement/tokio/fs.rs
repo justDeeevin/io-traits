@@ -107,8 +107,13 @@ impl DirEntry for tokio::fs::DirEntry {
 }
 
 impl File for Compat<tokio::fs::File> {
+    type OpenOptions = tokio::fs::OpenOptions;
+
     async fn create(path: impl AsRef<std::path::Path>) -> std::io::Result<Self> {
         Ok(tokio::fs::File::create(path).await?.compat())
+    }
+    async fn create_new(path: impl AsRef<std::path::Path>) -> std::io::Result<impl File> {
+        Ok(tokio::fs::File::create_new(path).await?.compat())
     }
     async fn open(path: impl AsRef<std::path::Path>) -> std::io::Result<Self> {
         Ok(tokio::fs::File::open(path).await?.compat())
@@ -130,5 +135,35 @@ impl File for Compat<tokio::fs::File> {
     }
     fn metadata(&self) -> impl Future<Output = std::io::Result<std::fs::Metadata>> {
         self.get_ref().metadata()
+    }
+}
+
+impl OpenOptions for tokio::fs::OpenOptions {
+    fn new() -> Self {
+        Self::new()
+    }
+    fn read(&mut self, read: bool) -> &mut Self {
+        self.read(read)
+    }
+    fn write(&mut self, write: bool) -> &mut Self {
+        self.write(write)
+    }
+    fn append(&mut self, append: bool) -> &mut Self {
+        self.append(append)
+    }
+    fn truncate(&mut self, truncate: bool) -> &mut Self {
+        self.truncate(truncate)
+    }
+    fn create(&mut self, create: bool) -> &mut Self {
+        self.create(create)
+    }
+    fn create_new(&mut self, create_new: bool) -> &mut Self {
+        self.create_new(create_new)
+    }
+    async fn open(
+        &self,
+        path: impl AsRef<std::path::Path>,
+    ) -> std::io::Result<impl File<OpenOptions = Self>> {
+        Ok(self.open(path).await?.compat())
     }
 }

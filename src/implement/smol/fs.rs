@@ -105,11 +105,25 @@ impl DirEntry for smol::fs::DirEntry {
 }
 
 impl File for smol::fs::File {
+    type OpenOptions = smol::fs::OpenOptions;
+
     fn create(path: impl AsRef<std::path::Path>) -> impl Future<Output = std::io::Result<Self>>
     where
         Self: Sized,
     {
         smol::fs::File::create(path)
+    }
+    fn create_new(
+        path: impl AsRef<std::path::Path>,
+    ) -> impl Future<Output = std::io::Result<impl File>>
+    where
+        Self: Sized,
+    {
+        smol::fs::OpenOptions::new()
+            .read(true)
+            .write(true)
+            .create_new(true)
+            .open(path)
     }
     fn open(path: impl AsRef<std::path::Path>) -> impl Future<Output = std::io::Result<Self>>
     where
@@ -134,5 +148,35 @@ impl File for smol::fs::File {
     }
     fn metadata(&self) -> impl Future<Output = std::io::Result<std::fs::Metadata>> {
         self.metadata()
+    }
+}
+
+impl OpenOptions for smol::fs::OpenOptions {
+    fn new() -> Self {
+        Self::new()
+    }
+    fn read(&mut self, read: bool) -> &mut Self {
+        self.read(read)
+    }
+    fn write(&mut self, write: bool) -> &mut Self {
+        self.write(write)
+    }
+    fn append(&mut self, append: bool) -> &mut Self {
+        self.append(append)
+    }
+    fn truncate(&mut self, truncate: bool) -> &mut Self {
+        self.truncate(truncate)
+    }
+    fn create(&mut self, create: bool) -> &mut Self {
+        self.create(create)
+    }
+    fn create_new(&mut self, create_new: bool) -> &mut Self {
+        self.create_new(create_new)
+    }
+    fn open(
+        &self,
+        path: impl AsRef<std::path::Path>,
+    ) -> impl Future<Output = std::io::Result<impl File<OpenOptions = Self>>> {
+        self.open(path)
     }
 }
