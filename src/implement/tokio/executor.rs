@@ -10,6 +10,10 @@ impl Executor for tokio::runtime::Runtime {
     ) -> Self::Task<T> {
         self.spawn(future)
     }
+
+    fn block_on<T: Send + 'static, F: Future<Output = T> + Send + 'static>(&self, future: F) -> T {
+        self.block_on(future)
+    }
 }
 
 impl RuntimeExecutor for Tokio {

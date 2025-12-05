@@ -19,6 +19,9 @@ pub trait Executor {
         &self,
         future: F,
     ) -> Self::Task<T>;
+
+    /// Run a future to completion.
+    fn block_on<T: Send + 'static, F: Future<Output = T> + Send + 'static>(&self, future: F) -> T;
 }
 
 /// A runtime with an executor.
