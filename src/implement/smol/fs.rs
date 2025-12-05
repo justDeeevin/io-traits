@@ -3,6 +3,7 @@ use futures_lite::Stream;
 
 impl Fs for crate::runtime::Smol {
     type File = smol::fs::File;
+    type DirEntry = smol::fs::DirEntry;
 
     fn canonocalize(
         path: impl AsRef<std::path::Path>,
@@ -39,7 +40,7 @@ impl Fs for crate::runtime::Smol {
     }
     fn read_dir(
         path: impl AsRef<std::path::Path>,
-    ) -> impl Future<Output = std::io::Result<impl Stream<Item = std::io::Result<impl DirEntry>>>>
+    ) -> impl Future<Output = std::io::Result<impl Stream<Item = std::io::Result<Self::DirEntry>>>>
     {
         smol::fs::read_dir(path)
     }
@@ -113,9 +114,7 @@ impl File for smol::fs::File {
     {
         smol::fs::File::create(path)
     }
-    fn create_new(
-        path: impl AsRef<std::path::Path>,
-    ) -> impl Future<Output = std::io::Result<impl File>>
+    fn create_new(path: impl AsRef<std::path::Path>) -> impl Future<Output = std::io::Result<Self>>
     where
         Self: Sized,
     {

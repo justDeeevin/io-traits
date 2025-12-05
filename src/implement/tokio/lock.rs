@@ -1,11 +1,13 @@
 use crate::{lock::*, runtime::Tokio};
 
 impl Barrier for tokio::sync::Barrier {
+    type WaitResult = tokio::sync::BarrierWaitResult;
+
     fn new(n: usize) -> Self {
         Self::new(n)
     }
 
-    fn wait(&self) -> impl Future<Output = impl BarrierWaitResult> {
+    fn wait(&self) -> impl Future<Output = Self::WaitResult> {
         self.wait()
     }
 }

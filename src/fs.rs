@@ -16,6 +16,9 @@ pub trait Fs {
     /// The file struct associated with this runtime.
     type File: File;
 
+    /// The directory entry struct associated with this runtime.
+    type DirEntry: DirEntry;
+
     /// Returns the canonical, absolute form of a path with all intermediate components normalized
     /// and symbolic links resolved.
     fn canonocalize(path: impl AsRef<Path>) -> impl Future<Output = Result<PathBuf>>;
@@ -59,7 +62,7 @@ pub trait Fs {
     /// The order of entries is unspecified.
     fn read_dir(
         path: impl AsRef<Path>,
-    ) -> impl Future<Output = Result<impl Stream<Item = Result<impl DirEntry>>>>;
+    ) -> impl Future<Output = Result<impl Stream<Item = Result<Self::DirEntry>>>>;
 
     /// Reads a symbolic link, returning the file to which it points.
     fn read_link(path: impl AsRef<Path>) -> impl Future<Output = Result<PathBuf>>;
@@ -156,7 +159,7 @@ pub trait File: AsRawFd + AsyncRead + AsyncWrite + AsyncSeek {
     /// Opens a file in read-write mode.
     ///
     /// Creates a file if it does not exist, or returns an error if it does.
-    fn create_new(path: impl AsRef<Path>) -> impl Future<Output = Result<impl File>>
+    fn create_new(path: impl AsRef<Path>) -> impl Future<Output = Result<Self>>
     where
         Self: Sized;
 

@@ -4,6 +4,7 @@ use tokio_util::compat::{Compat, TokioAsyncReadCompatExt};
 
 impl Fs for crate::runtime::Tokio {
     type File = Compat<tokio::fs::File>;
+    type DirEntry = tokio::fs::DirEntry;
 
     fn canonocalize(
         path: impl AsRef<std::path::Path>,
@@ -40,7 +41,7 @@ impl Fs for crate::runtime::Tokio {
     }
     async fn read_dir(
         path: impl AsRef<std::path::Path>,
-    ) -> std::io::Result<impl Stream<Item = std::io::Result<impl DirEntry>>> {
+    ) -> std::io::Result<impl Stream<Item = std::io::Result<Self::DirEntry>>> {
         Ok(tokio_stream::wrappers::ReadDirStream::new(
             tokio::fs::read_dir(path).await?,
         ))
@@ -112,7 +113,7 @@ impl File for Compat<tokio::fs::File> {
     async fn create(path: impl AsRef<std::path::Path>) -> std::io::Result<Self> {
         Ok(tokio::fs::File::create(path).await?.compat())
     }
-    async fn create_new(path: impl AsRef<std::path::Path>) -> std::io::Result<impl File> {
+    async fn create_new(path: impl AsRef<std::path::Path>) -> std::io::Result<Self> {
         Ok(tokio::fs::File::create_new(path).await?.compat())
     }
     async fn open(path: impl AsRef<std::path::Path>) -> std::io::Result<Self> {

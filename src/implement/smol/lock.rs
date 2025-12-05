@@ -1,11 +1,13 @@
 use crate::{lock::*, runtime::Smol};
 
 impl Barrier for smol::lock::Barrier {
+    type WaitResult = smol::lock::BarrierWaitResult;
+
     fn new(n: usize) -> Self {
         Self::new(n)
     }
 
-    fn wait(&self) -> impl Future<Output = impl BarrierWaitResult> {
+    fn wait(&self) -> impl Future<Output = Self::WaitResult> {
         self.wait()
     }
 }

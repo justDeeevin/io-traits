@@ -139,6 +139,8 @@ pub trait RwLockWriteGuard<T: ?Sized>: RwLockReadGuard<T> + DerefMut {
 
 /// A counter to synchrononize multiple tasks at the same time.
 pub trait Barrier {
+    type WaitResult: BarrierWaitResult;
+
     /// Creates a new barrier that will block a given number of tasks.
     ///
     /// A barrier will block `n`-1 tasks which will call [`Barrier::wait`] and then wake up all
@@ -150,7 +152,7 @@ pub trait Barrier {
     /// Barriers are re-usable after all tasks have rendezvoused.
     ///
     /// A single (arbitrary) future will receive a [`BarrierWaitResult`] that returns true from [`BarrierWaitResult::is_leader`] when returning from this function, and all other tasks will receive a result that will return false from `is_leader`.
-    fn wait(&self) -> impl Future<Output = impl BarrierWaitResult>;
+    fn wait(&self) -> impl Future<Output = Self::WaitResult>;
 }
 
 /// Returned by [`wait`](Barrier::wait) when all tasks in the `Barrier` have rendezvoused.
