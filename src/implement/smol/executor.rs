@@ -1,13 +1,12 @@
 use crate::{executor::*, runtime::Smol};
 
 impl Executor for smol::Executor<'_> {
-    type TaskWrap<T> = T;
-    type Task<T: 'static> = smol::Task<T>;
+    type Handle<T: 'static> = smol::Task<T>;
 
     fn spawn<T: Send + 'static, F: Future<Output = T> + Send + 'static>(
         &self,
         future: F,
-    ) -> Self::Task<T> {
+    ) -> Self::Handle<T> {
         self.spawn(future)
     }
 
@@ -20,6 +19,14 @@ impl Executor for smol::Executor<'_> {
         Self: Sized,
     {
         Ok(smol::Executor::new())
+    }
+}
+
+impl<T> Handle<T> for smol::Task<T> {
+    type Wrap<U> = U;
+
+    fn detach(self) {
+        self.detach();
     }
 }
 

@@ -35,7 +35,7 @@ tokio = ["dep:tokio", "dep:tokio-stream", "dep:tokio-util"]
 futures = ["dep:futures"]
 
 full = ["lock", "channel", "exec", "fs", "time", "net"]
-exec = ["tokio/rt-multi-thread", "futures/thread-pool"]
+exec = ["tokio/rt-multi-thread", "futures/thread-pool", "tokio-util/rt"]
 lock = ["tokio/sync"]
 channel = ["dep:futures-lite", "tokio/sync", "tokio-stream/sync"]
 fs = ["dep:futures-lite", "tokio/fs", "tokio-stream/fs", "tokio-util/compat"]

@@ -1,14 +1,15 @@
+use tokio_util::task::AbortOnDropHandle;
+
 use crate::{executor::*, runtime::Tokio};
 
 impl Executor for tokio::runtime::Runtime {
-    type TaskWrap<T> = Result<T, tokio::task::JoinError>;
-    type Task<T: 'static> = tokio::task::JoinHandle<T>;
+    type Handle<T: 'static> = AbortOnDropHandle<T>;
 
     fn spawn<T: Send + 'static, F: Future<Output = T> + Send + 'static>(
         &self,
         future: F,
-    ) -> Self::Task<T> {
-        self.spawn(future)
+    ) -> Self::Handle<T> {
+        AbortOnDropHandle::new(self.spawn(future))
     }
 
     fn block_on<T: Send + 'static, F: Future<Output = T> + Send + 'static>(&self, future: F) -> T {
@@ -22,6 +23,14 @@ impl Executor for tokio::runtime::Runtime {
         tokio::runtime::Builder::new_multi_thread()
             .enable_all()
             .build()
+    }
+}
+
+impl<T> Handle<T> for AbortOnDropHandle<T> {
+    type Wrap<U> = Result<U, tokio::task::JoinError>;
+
+    fn detach(self) {
+        self.detach();
     }
 }
 

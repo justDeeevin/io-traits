@@ -1,16 +1,7 @@
 //! A task executor that can spawn futures to be run concurrently.
 
 pub trait Executor {
-    /// A wrapper around the return type of a task.
-    ///
-    /// This is only used by tokio, whose [`JoinHandle`](tokio::task::JoinHandle) returns a
-    /// [`Result`].
-    type TaskWrap<T>;
-
-    /// A handle to a spawned task.
-    ///
-    /// Dropping the handle will cancel the task. Awaiting it will wait for the task to complete.
-    type Task<T: 'static>: Future<Output = Self::TaskWrap<T>>;
+    type Handle<T: 'static>: Handle<T>;
 
     /// Spawn a future to be run by the executor.
     ///
@@ -18,7 +9,7 @@ pub trait Executor {
     fn spawn<T: Send + 'static, F: Future<Output = T> + Send + 'static>(
         &self,
         future: F,
-    ) -> Self::Task<T>;
+    ) -> Self::Handle<T>;
 
     /// Run a future to completion.
     fn block_on<T: Send + 'static, F: Future<Output = T> + Send + 'static>(&self, future: F) -> T;
@@ -27,6 +18,22 @@ pub trait Executor {
     fn new() -> std::io::Result<Self>
     where
         Self: Sized;
+}
+
+/// A handle to a spawned task.
+///
+/// Dropping the handle will cancel the task. Awaiting it will wait for the task to complete.
+pub trait Handle<T>: Future<Output = Self::Wrap<T>> {
+    /// A wrapper around the return type of a task.
+    ///
+    /// This is only used by tokio, whose [`JoinHandle`](tokio::task::JoinHandle) returns a
+    /// [`Result`].
+    type Wrap<U>;
+
+    /// Drops the task _without_ canceling it.
+    ///
+    /// This is useful if you want a task to run in the background.
+    fn detach(self);
 }
 
 /// A runtime with an executor.
